@@ -259,9 +259,17 @@ and if anything was held back, say why in one short clause. Use ONLY the numbers
 Plan JSON: {plan}"""
 
 
+_client = None
+
+
 def _gemini():
-    from google import genai  # imported lazily so tests run without the SDK configured
-    return genai.Client(api_key=get_settings().gemini_api_key)
+    """One shared client for the whole app. (google-genai closes a client once it
+    is garbage-collected, so a throwaway client per call can fail mid-request.)"""
+    global _client
+    if _client is None:
+        from google import genai  # imported lazily so tests run without the SDK configured
+        _client = genai.Client(api_key=get_settings().gemini_api_key)
+    return _client
 
 
 def _contents(s: AdvisorSession, text: str):

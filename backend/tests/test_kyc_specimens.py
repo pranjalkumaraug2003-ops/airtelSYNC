@@ -4,7 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from app.kyc.service import extract
+import hashlib
+import json
+
+from app.kyc.service import _extract as extract  # live OCR, never the cache
 from app.kyc.validator import validate
 
 DOCS = Path(__file__).resolve().parent.parent / "data" / "kyc_documents"
@@ -39,3 +42,18 @@ def test_specimen(applicant, expected):
     failed = {c["id"] for c in rep["checks"] if c["status"] == "fail"}
     assert failed == expected
     assert rep["verdict"] == ("needs_action" if expected else "verified")
+
+
+def test_precomputed_cache_gives_expected_verdicts():
+    """data/ocr_cache.json (used to serve the specimens instantly) must lead to
+    exactly the same KYC verdicts as live OCR. Raw OCR text can differ slightly
+    between Tesseract versions, so we compare outcomes, not raw strings."""
+    cache = json.loads((DOCS.parent / "ocr_cache.json").read_text(encoding="utf-8"))
+    assert len(cache) == 47
+    for applicant, expected in EXPECTED.items():
+        docs = {}
+        for p in sorted(DOCS.glob(f"{applicant}_*.png")):
+            r = cache[hashlib.sha256(p.read_bytes()).hexdigest() + ":" + p.stem[4:]]
+            docs[r["doc_type"]] = r
+        rep = validate(docs).to_dict()
+        assert {c["id"] for c in rep["checks"] if c["status"] == "fail"} == expected, applicant

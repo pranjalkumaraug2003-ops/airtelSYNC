@@ -1,5 +1,6 @@
 """Udyam Digital API (Team 2Pointers, DTU) for Airtel SYNC 2026, Digital Track."""
 import logging
+import threading
 import time
 from contextlib import asynccontextmanager
 
@@ -19,7 +20,21 @@ settings = get_settings()
 async def lifespan(_: FastAPI):
     get_store()  # load CSVs once
     engine()     # create SQLite tables
+    # Train the lead model and compute insights in the background so the first
+    # visitor to the partner console does not wait ~30 s on a small instance.
+    threading.Thread(target=_warm, daemon=True).start()
     yield
+
+
+def _warm() -> None:
+    try:
+        from app.ml.insights import compute
+        from app.ml.propensity import get_model
+        get_model()
+        compute()
+        logging.getLogger("startup").info("Model and insights warmed up")
+    except Exception as e:  # never block startup on warm-up
+        logging.getLogger("startup").warning("Warm-up failed: %s", e)
 
 
 app = FastAPI(

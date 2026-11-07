@@ -13,6 +13,11 @@ import cv2
 import numpy as np
 import pytesseract
 
+# Tesseract uses OpenMP threads by default. On small cloud instances with a
+# fraction of a CPU these threads fight each other and OCR becomes ~50x slower,
+# so we pin it to one thread (inherited by the tesseract subprocess).
+os.environ.setdefault("OMP_THREAD_LIMIT", "1")
+
 # Find the Tesseract binary: TESSERACT_CMD env var, then PATH, then the
 # default Windows install folder (so local runs work even if PATH is stale).
 _TESS = os.getenv("TESSERACT_CMD") or shutil.which("tesseract")
