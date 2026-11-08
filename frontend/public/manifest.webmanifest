@@ -1,0 +1,9 @@
+{
+  "name": "Udyam Digital by Accel Business",
+  "short_name": "Udyam Digital",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F2",
+  "theme_color": "#D7192A",
+  "icons": []
+}
