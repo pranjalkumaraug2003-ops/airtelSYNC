@@ -7,16 +7,16 @@ import { useI18n } from "@/lib/i18n";
 export default function Home() {
   const { t } = useI18n();
   const steps = [
-    { icon: MessageCircle, title: t("step_advisor"), sub: "2 minutes · chat or tap" },
-    { icon: ReceiptIndianRupee, title: t("step_quote"), sub: "No product codes, no PDFs" },
-    { icon: FileCheck2, title: t("step_kyc"), sub: "GSTIN lookup + photo check" },
-    { icon: Truck, title: t("step_track"), sub: "WhatsApp updates, no chasing" },
+    { icon: MessageCircle, title: t("step_advisor"), sub: t("sub_advisor") },
+    { icon: ReceiptIndianRupee, title: t("step_quote"), sub: t("sub_quote") },
+    { icon: FileCheck2, title: t("step_kyc"), sub: t("sub_kyc") },
+    { icon: Truck, title: t("step_track"), sub: t("sub_track") },
   ];
   return (
     <Shell>
       <section className="rounded-3xl bg-ink px-5 py-7 text-white">
         <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
-          <BadgeCheck size={14} /> For kiranas, clinics, offices, chains & small factories
+          <BadgeCheck size={14} /> {t("audience")}
         </span>
         <h1 className="mt-4 text-[28px] font-extrabold leading-tight">{t("hero")}</h1>
         <p className="mt-2 text-sm text-white/70">{t("tagline")}</p>
